@@ -1,0 +1,22 @@
+拷贝目录 cp -r dirA dirB
+删除目录 rm -rf dirA
+查看被监听的端口 netstat -tlunp
+查看防火墙放开的端口 iptables-save
+查看防火墙状态 firewall-cmd --state
+放开端口8080 firewall-cmd --zone=public --add-port=8080/tcp -permanent
+    放开之后需要重启防火墙 firewall-cmd --reload
+解压.gz的文件 tar -zxvf xxx.tar.gz
+解压wat包 unzip xxx.war -d /xxx/xxx/dirA
+清空当前目录 rm -rf *
+查看某个服务是否启动 ps -ef|grep tomcat
+查看实时日志 tail -f catalina.out
+tomcat默认的最新日志输出到catalina.out文件中
+使用xshell连接到CentOS7时，使用rz命令通过xshell向centOS传输文件
+查看当前主机名称 hostnamectl
+关闭、打开、查看状态防火墙 systemctl stop/start/status firewalld
+全局查找文件 find / -name xxx*
+创建环境变量export ZOOKEEPER_HOME=/usr/local/zookeeper-3.4.10/
+添加到path环境变量 export PATH=$PATH:$ZOOKEEPER_HOME/bin
+查看所有的环境变量 env
+删除环境变量 unset ZOOKEEPER_HOME
+查看当前登录用户下所有的进程 top -u root
