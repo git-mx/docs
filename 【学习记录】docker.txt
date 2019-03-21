@@ -1,1 +1,93 @@
-https://www.cnblogs.com/yufeng218/p/8370670.html
+01.据说docker必须安装在拥有3.10及以上内核的宿主机上，先检查内核版本 uname -r
+02.使用yum install docker
+03.使用systemctl start docker 启动docker
+04.查看docker版本 docker -v 如果出现版本信息则表示安装成功
+05.设置开机启动docker服务 systemctl enable docker
+06.在网站https://hub.docker.com/r/library/tomcat/查看docker所支持的tomcat版本
+07.在docker里安装tomcat镜像 docker pull tomcat:8.5.38
+08.查看本地所有的镜像 docker images
+09.基于镜像创建一个容器 docker run --name tomcat80 -p 80:8080 tomcat，
+  这里的80表示宿主机的端口号，8080是容器的端口号，意思就是把宿主机的80端口映射到容器自身的8080端口
+  如果是部署web项目，那么conf/server.xml里面配置的端口号一定要与容器映射的端口号（这里是8080）一样。
+  这时创建的容器是没有启动的。
+10.查看运行的容器 docker ps -a 如果不加-a参数表示只查看正在运行的参数
+11.启动一个已经存在的容器 docker start cid(假设是b83) b83是CONTAINER_ID的前面几位，不一定要全部输入
+12.这时再用docker ps命令查看容器已经在运行了，这时可以在宿主机使用 curl localhost:80来测试是否启动成功
+13.查看防火墙状态，并将宿主机的80端口映射出去，具体命令见CentOS7命令，如果是腾讯或者阿里的云服务器，还
+   需要去对应厂商的控制台设置端口映射。端口放出之后就可以通过外网ip来访问部署在容器里的web项目了
+14.部署web应用到对应的tomcat容器，首先可以使用 docker inspect -f '{{.Id}}' tomcat80 来查看容器的完整ID
+15.使用docker exec -it b83 /bin/bash 进入容器系统（容器实际上就是一个虚拟机系统），它的内部文件结构大致
+   与CentOS一致，都拥有/usr、/etc、等这些目录，和LINUX系统一样，可以使用cd命令来进入不同的目录
+   进入tomcat容器之后的默认路径是 /usr/local/tomcat
+16.在容器内的任何目录都可以使用exit命令退出容器回到宿主机
+17.cd webapps rm -rf * 删除webapps下的所有文件，然后cd conf rm server.xml 删除server.xml
+18.使用exit 命令退出到宿主机，然后使用 cp /AAAA/BBBB/server.xml b83:/usr/local/tomcat/conf 命令将server.xml
+   文件拷贝到tomcat容器的/usr/local/tomcat/conf目录下。同理将ROOT.war包拷贝到/usr/local/tomcat/webapps目录下，
+   在容器内是无法配置免项目名访问的，想要免项目名访问只有一个办法，那就是把war包命名成ROOT.war。
+19.另外在容器中是无法识别localhost的，以为在容器内部的localhost相当于是容器系统的localhost，无法访问宿主机的
+   资源了。因此在我部署我的项目的时候MYSQL的连接地址使用的是外网地址，本来想使用127.0.0.1的，结果也不行，就算
+   在宿主机部署tomcat使用127.0.0.1连接MYSQL也没成功过，目前还不知道具体原因。
+20.在把war包拷贝到容器之后，容器就会自动启动web项目，如果想查看是否启动成功，可以在自己的代码里自定义日志位置，
+   例如我定义的是/usr/local/tomcat/shyfay-admin.log.这时就可以使用tail命令或者vim命令查看日志输出了
+21.容器就是一个虚拟机系统，它内部也是许多软件都是缺失的，需要我们手动安装，例如如下安装vim编辑器的命令
+   apt-get update
+   apt-get install vim
+22.部署成功之后把端口映射出去就可以在外网通过域名来访问部署在docker容器中的web项目了，大功告成。
+23.当我们查看日志的时候会发现一个问题就是，日志的日期不是系统当前时间，这是因为容器的默认市区是世界标准时区，
+   我们可以通过相应的操作来修改这个时区，有几种方式来纠正时区问题
+   A）将宿主机的时区文件复制到容器 docker cp /etc/localtime b83:/etc/
+   这种方式虽然能够改正容器的时区，但是tomcat输出的日志还是UTC标准时区的时间，这是因为tomcat的时区不是与容器
+   一样的，而是与JMV启动时，JVM采用的时区保持一致。这样就需要在创建容器时就指定时区了
+   B）创建容器时指定宿主机时区 docker run -it -d --name tomcat80 -v /etc/localtime:/etc/localtime:ro tomcat
+    上面句不生效，用下面的
+    docker run --name tomcat80 -p 8800:8080 -e TZ="Asia/Shanghai" -v /etc/localtime:/etc/localtime tomcat
+24.以下附上在docker中部署可以通过域名和免项目名访问的server.xml。（免端口的方法是直接将tomcat容器映射到宿主机的80端口即可）
+   见server-docker.xml
+docker常用命令
+删除一个容器使用docker rm  -f b83 来删除，-f表示强制的意思，即可以删除正在运行的容器。
+我们可以将docker容器粗暴的比拟为一个虚拟机，在创建docker容器的时候可以指定每个docker
+容器所占用的物理内存和swap内存。
+
+docker的三大组件：仓库（类似于GIT的仓库，拥有公有仓库和私有仓库）、
+                  镜像（例如我们的tomcat镜像就是从公共镜像池下载的）
+				  容器
+什么是docker: docker是依托于linux内核功能的虚拟化技术。
+docker有什么好处：
+docker的核心理念就是build once,run anywhere
+1.交付物标准化，所谓交付物标准化的意思就是，让交付应用所需要的资源、配置项、操作动作等都标准
+  在传统虚拟机或者物理机里面部署一个tomcat的web项目你可能需要做的是：下载和安装JVM、下载和安装TOMCAT、
+  然后去配置环境变量。但是使用docker只需要一个镜像就能搞定。
+2.一次构建，多次交付。当涉及到应用程序多副本部署或者应用程序迁移时，最能体现docker的价值。
+      （例如web服务集群、MYSQL集群部署、REDIS集群等），或者想换一台机器了，就可以使用导入和导出的方式来搬运容器
+3.应用隔离，Docker容器可以隔离不同应用程序之间的相互影响，但是比虚拟机开销更小。例如隔离MYSQL环境和WEB环境的配置变量。
+4.方便构建基于SOA架构或者微服务架构的系统，通过服务编排，更好地松耦合。
+
+
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+

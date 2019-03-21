@@ -14,9 +14,16 @@ tomcat默认的最新日志输出到catalina.out文件中
 使用xshell连接到CentOS7时，使用rz命令通过xshell向centOS传输文件
 查看当前主机名称 hostnamectl
 关闭、打开、查看状态防火墙 systemctl stop/start/status firewalld
-全局查找文件 find / -name xxx*
+全局查找文件 find / -name xxx*  也可以用 whereis sysctl 来查看某个命令是否安装
 创建环境变量export ZOOKEEPER_HOME=/usr/local/zookeeper-3.4.10/
 添加到path环境变量 export PATH=$PATH:$ZOOKEEPER_HOME/bin
 查看所有的环境变量 env
 删除环境变量 unset ZOOKEEPER_HOME
 查看当前登录用户下所有的进程 top -u root
+VIM编辑器中使用 Shift+g可以是光标定位到文件最后一行
+使用命令./mysqld --verbose --help|grep -A 1 'Default options' 来查看mysql所使用的配置文件位置
+service mysql start 启动MYSQL服务
+service mysql stop 停止MYSQL服务
+sysctl net.ipv4.ip_forward 查看是否开启外网访问
+使用 curl http://localhost:80/domain/getDomain 可以调用本地服务的接口
+
