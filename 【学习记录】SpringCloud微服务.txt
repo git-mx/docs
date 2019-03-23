@@ -62,6 +62,7 @@
 	B.对于业务相关的数据，则应该保存在统一的数据库中，如果性能扛不住，可以进行读写分离或者分布式数据库；
 	C.对于文件，照片之类的数据，应该存放在统一的对象存储里面，通过CDN进行预加载；
 	D.对于非结构化数据，可以存在在统一的搜索引擎里面，例如ElasticSearch；
+	遗留问题：ElasticSearch数据存储
 011.幂等的接口设计
 	但是还有一个遗留的问题，就是已经分发，正在处理，但是尚未存储的数据，肯定会在内存中有一些，在进程重启的时候，数据还是会丢一些的，
 	那这部分数据怎么办呢？这部分就需要通过重试进行解决，当本次调用过程中失败之后，前序的进程会进行重试，例如Dubbo就有重试机制。
@@ -77,6 +78,19 @@
 016.一个列表操作的好东西List.stream()  里面有许多许多实用的功能，例如
 	productInfoList.stream().map(ProductInfo::getCategoryType).collect(Collectors.toList());
 	能够返回一个List<Integer>的列表。
+017.dto data transfer object  vo view object TODO注释的意思是还没有做的事情
+018.pom的dependency里面的组件，如果springcloud 也集成了这个组件就不用写版本号，例如com.google.code.gson
+019.遗留问题：RPC框架
+020.遗留问题：Restful
+021.RestTemplate、LoadBalancerClient、ServiceClient
+022.服务端发现和客户端发现
+	* 对于服务发现来说，有两种发现方式，一种是服务端发现，一种是客户端发现，服务端发现的意思就是：所有服务对于客户端来说是透明的，客户端完全
+	* 不需要知道服务端有哪些服务，服务注册中心为所有的服务端都设置了一个代理，客户端就是通过这些代理来发现服务的
+	* 客户端发现，就是客户端实现知道有哪些服务已经注册到了服务注册中心，然后在自己代码里选定好对应的服务进行调用
+	* 典型的服务端发现是zookeeper注册中心，SpringCloud的Eureka属于客户端发现
+	遗留问题：zookeeper，需要知道zookeeper的具体用法和原理，以及怎么和SpringCloud集成
+023.
+
 
 
 	
