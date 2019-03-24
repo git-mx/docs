@@ -78,6 +78,7 @@
 016.一个列表操作的好东西List.stream()  里面有许多许多实用的功能，例如
 	productInfoList.stream().map(ProductInfo::getCategoryType).collect(Collectors.toList());
 	能够返回一个List<Integer>的列表。
+	List<Car> carList = sourceList.stream().map(e -> new Car(e.getName(), e.getType()).collect(Collectors.toList());
 017.dto data transfer object  vo view object TODO注释的意思是还没有做的事情
 018.pom的dependency里面的组件，如果springcloud 也集成了这个组件就不用写版本号，例如com.google.code.gson
 019.遗留问题：RPC框架
@@ -89,9 +90,43 @@
 	* 客户端发现，就是客户端实现知道有哪些服务已经注册到了服务注册中心，然后在自己代码里选定好对应的服务进行调用
 	* 典型的服务端发现是zookeeper注册中心，SpringCloud的Eureka属于客户端发现
 	遗留问题：zookeeper，需要知道zookeeper的具体用法和原理，以及怎么和SpringCloud集成
-023.
-
-
+023.使用POSTMAN发送POST请求。
+024.Ribbon负载均衡器和源码阅读 
+    A.ctrl+alt+b 可以跳转到一个方法的实现类去
+	B.在某一实现类中右键-Diagrams-Show Diagrams-Java Class Diagrams (Popup以悬浮小窗的形式展示)来查看类之间的关系，
+	  遗留问题：使用StarUML画类的关系图
+	C.在阅读源码的时候不需要所有的都去阅读，底层实现也需要去理解，只需要知道它的大概原理即可。比如我们在阅读Ribbon
+	  的源码时，我们想一想一个负载均衡器要干什么事情，那就干一件事情嘛，从众多服务中选一个出来丢给客户端调用嘛。那么
+	  我们能想到的肯定是负载均衡器肯定要先去获取在线的服务列表吧，于是我们就在源码里面去追踪可能是获取服务列表的方法，
+	  这时我们就发现了在choose方法里面有一个getServer方法，这时我们追踪到发现系统使用了一个factory工厂根据我们传入的
+	  服务名称IMOOC-PRODUCT来创建了一个ILoadBalancer实例，在得到这个实例之后就调用了ILoadBalancer的chooseServer,
+	  这时候可以在实现类里面使用alt我们要查看ILoadBalancer的chooseServer方法的实现类，但是有三个类都实现了它，
+	  我们怎么知道是哪一个呢，初步通过代码查看可以过滤掉NoOpLoadBalancer，因为这个实现类里面的chooseServer直接返回一个null
+	  肯定不是我们要找的，于是我们在BaseLoadBalancer里和ZoneAwareLoadBalancer里面都打一个断点，会发现ZoneAwareLoadBalancer
+	  里面的断点命中了，这时但最后还是走到了BaseLoadBalancer里面的chooseServer方法。于是我们追踪BaseLoadBalancer的
+	  chooseServer方法里面用到了一个rule通过这个单词我们就能判断它是负载均衡规则（策略）的意思，于是我们最终发现
+	  默认的规则名称叫做RoundRobinRule一看名字是以Round开头的肯定就是轮训了，我们可以在浏览器里面反复掉用服务来发现
+	  返回的数据总是8081和8082交替出现。
+	D.如果我们需要改变Ribbon的策略，我们可以到spring.io去查找ribbon的API文档，找的时候可以看几个关键字比如Customizing或者
+	  Properties等。最后我们找到Customizing the Ribbon Client by Setting Properties发现了一段配置示例其中的user就是我们
+	  服务的名称IMOOC-PRODUCT。然后NFLoadBalancerRuleClassName后面的策略名称我们怎么写呢，这就去IRule源码里面看了，怎么去找
+	  呢，还是回到我们刚才BaseLoadBalancer的chooseServer方法里面然后定位带IRule接口，的choose方法，因为所有的策略肯定都实现
+	  了这个类，于是我们通过点击左边实现类的导航的时候就能看到有哪些负载均衡策略了，我们随便选一个比如RandomRule，然后把
+	  报名和类名贴到我们的application.yml文件里像，这样 com.netflix.loadbalancer.RandomRule，然后我们重启服务
+	  再去浏览器里面测试一下发现已经不是8081和8082交替出现了。
+	E.Ribbon的负载均衡策略 https://blog.csdn.net/rickiyeat/article/details/64918756
+	  我们甚至可定义自定ribbon的负载均衡策略 https://www.2cto.com/kf/201806/754286.html
+025.Feign feign就是写一个基于注解的接口来实现http调用,使用方法去spring.io上看
+026.遗留问题：MySql自增主键的一些问题，首先一个问题就是B是A的子表，现在有一个A和多个B，这时在保存数据时
+    想要在保存B的aid的时候你得先把A先保存了，然后才能获得aid，这就很不方便啦。
+027.如果公司有自己的maven共有仓库，那么我们最好是设置两个settings.xml和两个本地maven仓库
+    公司的settings.xml对应公司的maven仓库，自己平时玩儿的settings.xml对应自己本地maven仓库
+	例如公司的settings.xml设置的localRepository是E:\MavenRepository。自己平时玩儿的settings.xml
+	设置的的localRepository是G:\MavenRepository。这样的话互不影响，在使用maven发布公司的还是自己玩儿的
+	都不会去下载对方的东西。如果害怕相互影响，甚至可以一个项目建立一个配置文件和本地仓库，不过这样不就失去maven的作用了吗？
+	要做到完全无污染，还必须要把自己玩儿的maven的地址设置成
+028.如果 mvn clean install 之后都必须手动将生成的结果目录不是你想要的目录，可以手动拷贝
+	E:\MavenRepository\com\shyfay 拷贝覆盖掉 G:\maven\repository\com\shyfay
 
 	
 	
