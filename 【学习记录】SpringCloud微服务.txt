@@ -3,9 +3,11 @@
     首先cd到项目的根目录，
 	然后执行mvn clean package  直到看到BUILD SUCCESS 字样
 	再执行java -jar /target/imooc-eureka-0.0.1-SNAPSHOT.jar
+	另外war包也可以使用java -jar来命令来执行
 	这样就会以jar包的形式运行项目，然后在浏览器输入对应的地址就可以访问了。
+	eureka注册的方式是两两注册，比如三个eureka注册中心集群的话，是1注册2,2注册3,3注册1这样子
 003.在同一个IDEA和同一个项目中可以用相同的配置文件同时运行多个项目副本，具体做法如下
-    #如何在同一个项目里启动ImoocEurekaApplication1和ImoocEurekaApplication2呢，首先是在右上角那点击Edit Configuration
+    #如何在同一个项目里启动EurekaApplication1和EurekaApplication2呢，首先是在右上角那点击Edit Configuration
 	#然后在左上角点击copy configuration 然后命名，
 	#然后选中某一个后制定运行端口，制定运行端口的方法是在右边Configuration-Environment-VM options
 	#里面填上-Dserver.port=8761,另一个填写成-Dserver.port=8762,如果有多个以此类推

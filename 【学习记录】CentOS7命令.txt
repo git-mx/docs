@@ -1,10 +1,11 @@
 拷贝目录 cp -r dirA dirB
 删除目录 rm -rf dirA
 查看被监听的端口 netstat -tlunp
-查看防火墙放开的端口 iptables-save
+查看防火墙放开的端口 iptables-save  firewall-cmd --list-port
 查看防火墙状态 firewall-cmd --state
-放开端口8080 firewall-cmd --zone=public --add-port=8080/tcp -permanent
+放开端口8080 firewall-cmd --zone=public --add-port=8080/tcp --permanent
     放开之后需要重启防火墙 firewall-cmd --reload
+	删除使用 firewall-cmd --zone=public --remove-port=80/tcp --permanent
 解压.gz的文件 tar -zxvf xxx.tar.gz
 解压wat包 unzip xxx.war -d /xxx/xxx/dirA
 清空当前目录 rm -rf *

@@ -5,7 +5,10 @@
 05.设置开机启动docker服务 systemctl enable docker
 06.在网站https://hub.docker.com/r/library/tomcat/查看docker所支持的tomcat版本
 07.在docker里安装tomcat镜像 docker pull tomcat:8.5.38
-08.查看本地所有的镜像 docker images
+08.查看本地所有的镜像 docker images  
+   删除某一个镜像 docker rmi IMAGE_ID
+   如果删除的时候报image is referenced in multiple repositories这个错误
+   那么就是用docker rmi tomcat:latest（latest是tomcat的版本号）就可以删除一个引用
 09.基于镜像创建一个容器 docker run --name tomcat80 -p 80:8080 tomcat，
   这里的80表示宿主机的端口号，8080是容器的端口号，意思就是把宿主机的80端口映射到容器自身的8080端口
   如果是部署web项目，那么conf/server.xml里面配置的端口号一定要与容器映射的端口号（这里是8080）一样。
@@ -61,6 +64,36 @@ docker的核心理念就是build once,run anywhere
       （例如web服务集群、MYSQL集群部署、REDIS集群等），或者想换一台机器了，就可以使用导入和导出的方式来搬运容器
 3.应用隔离，Docker容器可以隔离不同应用程序之间的相互影响，但是比虚拟机开销更小。例如隔离MYSQL环境和WEB环境的配置变量。
 4.方便构建基于SOA架构或者微服务架构的系统，通过服务编排，更好地松耦合。
+
+docker安装和使用jetty
+使用docker pull jetty安装镜像
+然后使用 docker run --name jetty80 -d -p 80:8080 -p 433:8433 jetty 安装容器
+命令的意思是将宿主机的80端口映射到容器的8080端口，将宿主机的433端口映射到容器的8433端口
+
+docker安装rabbitMQ 
+docker run -d --hostname rabbit5672 -p 5672:5672 -p 15672:15672 rabbitmq:3.7.3-management
+在docker中部署eureka集群 https://www.cnblogs.com/520playboy/p/7929500.html
+
+		https://www.jianshu.com/p/97b075ee603c
+        制作单个docker镜像 https://blog.csdn.net/michael_hm/article/details/79280720
+		
+JAVA_HOME=/usr/local/java/jdk1.8.0_192
+
+将eureka部署到docker容器中
+1.首先创建eureka项目并配置号端口号8761（一定要记住这个端口号）
+2.其次使用mvn -clean package将项目打包成jar包
+3.将jar包拷贝到LINUX系统的/home/eureka中
+4.在/home/eureka中创建一个dockerfile 直接用vim dockerfile创建
+5.在dockerfile文件中输入如下内容
+  FROM openjdk:8-jdk-alpine  这是源镜像，我们采用jdk作为源镜像是为了构建JAVA的运行环境
+  VOLUME /home/eureka        指定dockerfile所在的目录还是什么的，目前还不清楚
+  add eureka-1.0-SNAPSHOT.jar /.app.jar 复制jar包，这里的源jar包不一定是在当前路径下
+  ENTRYPOINT ["java", "-jar", "app.jar"] 让容器启动时使用java命令运行java启动我们的eureka服务
+6.然后使用命令 docker build -t eureka-server . 创建镜像
+  如果中途报下载openjdk超时可以重新执行该命令
+7.启动容器 docker run --name eureka80 -p 宿主机端口:容器端口 eureka-server
+  这时会看到spring启动的日志
+  
 
 
 
