@@ -129,6 +129,8 @@
 	要做到完全无污染，还必须要把自己玩儿的maven的地址设置成
 028.如果 mvn clean install 之后都必须手动将生成的结果目录不是你想要的目录，可以手动拷贝
 	E:\MavenRepository\com\shyfay 拷贝覆盖掉 G:\maven\repository\com\shyfay
+029.遗留问题docker私有仓库
+030.
 
 	
 	
