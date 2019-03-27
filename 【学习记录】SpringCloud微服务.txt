@@ -130,7 +130,46 @@
 028.如果 mvn clean install 之后都必须手动将生成的结果目录不是你想要的目录，可以手动拷贝
 	E:\MavenRepository\com\shyfay 拷贝覆盖掉 G:\maven\repository\com\shyfay
 029.遗留问题docker私有仓库
-030.docker-config
+030.docker-config ，针对client端来说config-server端是外网地址，那么在config-server注册到eureka服务注册中心的时候一定要要做如下配置
+    instance:
+		ip-address: 132.232.48.14
+		prefer-ip-address: true
+	因为如果不配置的话，有可能通过eureka注册中心去访问config服务是无法成功的，
+	另外一点就是针对于client端来说，eureka注册中心的配置千万不要放到config配置中心去配置，一定要在bootstrap.yml文件里直接配置，
+	因为config是注册在注册中心的服务，如果把eureka注册中心的配置放到config配置中心去，系统在启动的时候使用bootstrap.yml找不到
+	对应的eureka注册中心的配置，从而就无法获取到config配置中心的配置文件了（因为config配置中心是eureka的一个服务），你都没有拿到
+	eureka的配置信息，又怎么能使用里面的服务呢。
+031.配置spring-cloud-bus和rabbitMQ
+    A.首先在config和业务服务中都配置上spring-cloud-start-bus-amqp
+	B.然后在配置文件中需要加入RabbitMQ的连接地址
+	    rabbitmq:
+			host: 132.232.48.14
+			port: 5672
+			username: guest
+			password: guest
+	C.在保持rabbitMQ是运行中的状态下，启动config端，就能够看到rabbitMQ的管理界面上出现了一个消息队列
+	D.在针对config的client端，也配置上spring-cloud-start-bus-amqp和rabbitMQ,然后能够在rabbitMQ的管理界面上增加了消息队列
+	E.这时config-server和config-client都准备就绪了，那么要怎么实现配置的动态刷新呢，大致过程是这样的，首先是保证
+	  config-server和多个config-client（例如product服务和order服务）都连接上了rabbitMQ.config-server负责发布消息到rabbitMQ的消息队列
+	  然后config-client从rabbitMQ的消息队列订阅消息。
+	F.接下来就是在github上更新了配置文件怎么才能通知到config-server呢，这就需要配置github的webhook了。首先时把config-client的bus-refresh
+	  这个接口给暴露出去，默认暴露的接口是/actuator/health和/actuator/info。我们需要在config-server的配置文件中做如下配置：
+	  management:
+		  endpoints:
+			web:
+			  exposure:
+				include: ["bus-refresh"]
+	  也有可能配置方式不一样，跟具体的springcloud版本有关系，例如在早期版本中就是通过management.endpoints.web.expose: "*"来暴露所有接口的
+	D.在保证config-server可以通过外网访问的情况下，将http://132.232.48.14:8080/monitor配置到github的webhook中，配置时默认只
+	  勾选PUSH即可，即有PUSH操作时就调用这个hook接口将配置文件推送到config-server配置中心，然后配置中心发布消息说，配置文件都改啦，你们快来取吧
+	  然后多个config-client订阅这一消息从而获取到最新的配置文件，在github上配置webhooks不能直接配置成/actuator/bus-refresh，必须要使用actuator/bus-refresh
+	  而且在github上只能在主配置文件上修改配置才会自动刷新（据说这是spring-cloud-bus的一个bug）。所谓主配置文件就是例如有两个配置文件一个order.yml一个是
+	  order-dev.yml。那么order.yml就是主配置文件。另外需要支持monitor还要config-server的pom中增加如下配置
+	  <dependency>
+		<groupId>org.springframework.cloud</groupId>
+		<artifactId>spring-cloud-config-monitor</artifactId>
+	  </dependency>
+
 
 	
 	
