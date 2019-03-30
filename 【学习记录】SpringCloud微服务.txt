@@ -169,6 +169,11 @@
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-config-monitor</artifactId>
 	  </dependency>
+032.CAP理论以及dubbo+zookeeper与spring cloud的对比 dubbo+zookeeper 更加注重ca即数据的一致性 而spring cloud更加注重于服务的可用性
+	CAP 数据一致性、服务可用性、服务对网络分区故障的容错性 dubbo+zookeeper保证的是CP，而spring cloud保证的是AP
+    遗留问题：CAP理论
+033.redis分布式锁，和分布式事务与事务回滚
+	
 
 
 	
