@@ -96,6 +96,9 @@ JAVA_HOME=/usr/local/java/jdk1.8.0_192
   这时会看到spring启动的日志
 8.注意每次重启防火墙都可能会导致docker服务不可用，这时可以先把容器关掉再打开就可以了
 8.构建eureka服务器集群 https://www.jianshu.com/p/97b075ee603c 
+
+批量操作容器和镜像 https://blog.csdn.net/wzygis/article/details/80547285
+
   
 
 
