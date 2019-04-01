@@ -173,6 +173,11 @@
 	CAP 数据一致性、服务可用性、服务对网络分区故障的容错性 dubbo+zookeeper保证的是CP，而spring cloud保证的是AP
     遗留问题：CAP理论
 033.redis分布式锁，和分布式事务与事务回滚
+034.在高并发的情况下使用springboot默认的hikariDatabase，会报出
+    java.sql.SQLTransientConnectionException: HikariPool-1 - Connection is not available, request timed out after 30000ms.
+	这个异常，这是由于在高并发的情况下，每一个数据库读写请求，都会创建一个数据库连接，导致hikariDatabase连接池中有许多空的还没有被回收的连接
+	最后连接数达到连接池的上限，就会抛出这个错。有几种解决方案，一种是增加连接池中最大连接数的数量，
+	高并发的情况下最好是使用alibaba的druid数据库
 	
 
 
