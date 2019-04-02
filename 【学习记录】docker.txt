@@ -98,6 +98,11 @@ JAVA_HOME=/usr/local/java/jdk1.8.0_192
 8.构建eureka服务器集群 https://www.jianshu.com/p/97b075ee603c 
 
 批量操作容器和镜像 https://blog.csdn.net/wzygis/article/details/80547285
+docker里面的服务是不能通过127.0.0.1或者localhost来访问宿主机的服务的，只能通过外网IP地址或者域名
+使用ifconfig可以查看docker容器的ip地址
+docker容器在启动时，加上  --network host 这个命令来设置让docker容器和宿主机保持在同一网段，这样docker容器就可以使用localhost和127.0.0.1来访问宿主机了
+Docker容器运行的时候有 host 、 bridge 、 none 三种网络可供配置。
+默认是 bridge ，即桥接网络，以桥接模式连接到宿主机； host 是宿主网络，即与宿主机共用网络； none 则表示无网络，容器将无法联网。
 
   
 
