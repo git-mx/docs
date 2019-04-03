@@ -12,7 +12,7 @@
 查看某个服务是否启动 ps -ef|grep tomcat
 查看实时日志 tail -f catalina.out
 tomcat默认的最新日志输出到catalina.out文件中
-使用xshell连接到CentOS7时，使用rz命令通过xshell向centOS传输文件
+使用xshell连接到CentOS7时，使用rz命令通过xshell向centOS传输文件  使用sz server.xml命令将从linux系统下载server.xml文件到本地
 查看当前主机名称 hostnamectl
 关闭、打开、查看状态防火墙 systemctl stop/start/status firewalld
 全局查找文件 find / -name xxx*  也可以用 whereis sysctl 来查看某个命令是否安装
@@ -27,4 +27,5 @@ service mysql start 启动MYSQL服务
 service mysql stop 停止MYSQL服务
 sysctl net.ipv4.ip_forward 查看是否开启外网访问
 使用 curl http://localhost:80/domain/getDomain 可以调用本地服务的接口
+VIM编辑器中在命令行模式下可以使用%d 命令来清空文件内容。可以使用 shift + g 来到文件末尾
 
