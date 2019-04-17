@@ -181,7 +181,7 @@
 035 feignclient调用对方的服务如果是有参数的，那么必须要求对方的Controller方法写成POST的，奇葩。。。
 036 在方法中写了一个PRE_TYPE,将鼠标双击选中这个PRE_TYPE，然后alt + enter 就可以定义类或者从别的类impport
 037 遗留问题：nginx
-
+038 可以使用Set<Long> streetIds = new HashSet();来去重，
 
 
 	
