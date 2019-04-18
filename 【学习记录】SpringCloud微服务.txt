@@ -182,6 +182,21 @@
 036 在方法中写了一个PRE_TYPE,将鼠标双击选中这个PRE_TYPE，然后alt + enter 就可以定义类或者从别的类impport
 037 遗留问题：nginx
 038 可以使用Set<Long> streetIds = new HashSet();来去重，
+039 微服务架构雪崩效应和Hystrix容错框架（中文意思就是豪猪）
+    -服务降级 服务降级的意思就是，区分业务，将所有的业务分为核心服务和非核心服务，比如商城系统的商品服务、订单服务、用户服务就是核心服务，其他的比如什么广告啊积分啊就是非核心服务
+	-依赖隔离 hystrix使用舱壁模式实现线程池的隔离，即为每一个@HystrixCommand注解是所使用的方法分配一个独立的线程池，这样就算这个方法的服务被阻塞或者挂掉了，也并不会影响其他线程的执行
+	          所以使用@HystrixCommand默认起到了服务降级和依赖隔离的作用
+	-服务熔断
+	-服务监控
+040 遗留问题：docker舱壁模式和docker仓库
+041 在pom.xml文件中右键Maven-> Show Dependencies 可以看到当前的pom依赖了哪些组件
+    然后在打开的窗口中Diagram Elements窗口中直接按键盘上的字母进行搜索，例如可以搜索 spring-cloud-netflix
+042 hystrix可视化监控工具hystrix-dashboard
+	访问地址：localhost:9002/hystrix
+	          在页面中输入Url:http://localhost:9002/hystrix.stream  Deplay:1 Title:Order
+	进入监控页后在监控页中可以看到请求数量、Circuit断路器状态、 Success - 成功 、Short-Circuited - 被执行降级的请求数、 Bad Request - 错误请求的数量、Timeout - 超时的请求数量 等等
+	
+043 POSTMAN执行高并发的操作是左上角的Runner然后选择一个请求目录里的请求Iterations是请求数Delay是两个请求之间的时间间隔
 
 
 	
