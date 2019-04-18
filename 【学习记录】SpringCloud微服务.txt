@@ -197,6 +197,27 @@
 	进入监控页后在监控页中可以看到请求数量、Circuit断路器状态、 Success - 成功 、Short-Circuited - 被执行降级的请求数、 Bad Request - 错误请求的数量、Timeout - 超时的请求数量 等等
 	
 043 POSTMAN执行高并发的操作是左上角的Runner然后选择一个请求目录里的请求Iterations是请求数Delay是两个请求之间的时间间隔
+044 遗留问题Zuul自带的hystrix
+045 分布式追踪框架sleuth和zipkin
+    - 使用docker安装zipkin docker run -d -p 9411:9411 -e TZ="Asia/Shanghai" -v /etc/localtime:/etc/localtime --network host openzipkin/zipkin
+	- 针对分布式系统的追踪系统的核心步骤：数据采集、数据存储、查询展示
+	- OpenTracing 分布式追踪系统规范，它的优势在与它提供平台无关和厂商无关的api，使得开发人员可以方便的添加或者更换追踪系统的实现
+	              它是由CNCF制定的规范，CNCF（Cloud Native Computing Foundation）云原生计算基金会，他们的宗旨是坚持和整合开源技术来编排容器作为微服务架构的一部分，Kubernetes就是他们的产品
+				   遗留问题：Kubernetes
+				  OpenTracing的数据模型中最重要的概念就是trace（调用链），是通过归属此trace的span来定义，trace和span其实都是源自谷歌的开源项目dapper的专业术语，还有一个比较重要概念是Annotation
+				  即事件，Annotation的作用是通过一些注解来记录请求的访问开始时间点，结束时间点等等这些重要的信息
+				  Annotation的事件类型有4种
+				  - cs（Client Send）: 客户端发起请求时间点
+				  - sr（Client Received）: 客户端收到响应的时间点
+				  - sr（Server Received）: 服务端收到请求的时间点
+				  - ss（Server Send）: 服务端处理完逻辑的时间点
+				  - 客户端调用的是时长=sr-sc
+				  - 服务端处理请求的时长=ss-sr
+	- zipkin是遵循OpenTracing，它是起源于google的开源项目dapper的一篇论文，然后twitter根据这篇论文编写了zipkin并将其开源
+	- zipkin的4大核心组件Collector、Storage、API、UI Collector组件的作用是收集来自客户端的调用数据，Storage的作用是将Collector收集来的调用数据进行存储，默认存储到内存里，我们可以拿来存到MYSQL库
+	- traceId 全局的跟踪ID它是跟踪的入口点，根据需求来决定在哪生成traceId，一般的http请求就是请求开始的地方生成traceId，
+	- spanId 这是下一层的请求跟踪ID，一个traceId可以包含一个以上的spanId
+	- parentId 是上层请求的跟踪ID
 
 
 	
