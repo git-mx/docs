@@ -180,7 +180,7 @@ rancher
 	  安装另外一台虚拟机用于rancher agent ，这不需要做额外的设置，只需要保证与其他主机之间的UDP端口 500和4500端口是放开的即可，并且安装了docker
 	  如果我们是使用的VMWare，那么就不用去管端口的事情了，因为VMWare虚拟机在创建时默认是将防火墙设置成关闭状态的
 	
-	-配置eureka高可用,首先修改好eureka项目,需要application.yml、application-eureka1.yml、application-eureka2.yml 三个配置文件
+	- 配置eureka高可用,首先修改好eureka项目,需要application.yml、application-eureka1.yml、application-eureka2.yml 三个配置文件
 	 然后使用bash build.sh重新将镜像推送到阿里云私有镜像仓库
 	 然后去rancher的服务里面将原有的eureka服务删除,
 	 然后重新添加eureka服务eureka1，端口映射8761:8761 环境变量 spring.profiles.active eureka1
@@ -188,13 +188,17 @@ rancher
 	 然后修改config服务的配置，将eureka的defaultZone改成http://eureka1:8761/eureka1/,http://eureka2:8762/eureka/，重新推送config镜像到阿里云私有镜像库
 	 然后在rancher的config服务后面点击升级即可，升级完成之后在服务列表页面点击config服务后面的升级完成
 	 
-	-配置product高可用
+	- 配置product高可用
 	 首先需要修改配置文件，将application.yml配置文件里面的server.port配置给干掉
 	 然后将Dockerfile文件里面的EXPOSE 9002 这一行干掉
 	 然后构建镜像到阿里云私有镜像仓库并在rancher中建立服务，建立服务时不指定端口，
 	 当服务运行起来后，在应用列表中点击product服务进入到product服务的详情页，然后在数量那儿点击+，每点一次+就会多启动一个product的docker容器，
 	 从而实现动态扩容，负载均衡由eureka的ribbon负载均衡器来实现
 	 
+	- 配置api-gateway负载均衡器
+	  在rancher添加好api-gateway服务后，在应用处选择添加应用-添加负载均衡器
+	  填写好名称，并设置端口映射80:8080，选择应用为api-gateway .
+	  然后去api-gateway详情页，在数量那儿点击 + 添加几台api-gateway即可
 	
 	  
 	
