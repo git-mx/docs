@@ -9,6 +9,7 @@
    删除某一个镜像 docker rmi IMAGE_ID
    如果删除的时候报image is referenced in multiple repositories这个错误
    那么就是用docker rmi tomcat:latest（latest是tomcat的版本号）就可以删除一个引用
+   删除所有镜像 docker rmi `docker images -q`
 09.基于镜像创建一个容器 docker run --name tomcat80 -p 80:8080 tomcat，
   这里的80表示宿主机的端口号，8080是容器的端口号，意思就是把宿主机的80端口映射到容器自身的8080端口
   如果是部署web项目，那么conf/server.xml里面配置的端口号一定要与容器映射的端口号（这里是8080）一样。
@@ -48,6 +49,7 @@
    见server-docker.xml
 docker常用命令
 删除一个容器使用docker rm  -f b83 来删除，-f表示强制的意思，即可以删除正在运行的容器。
+删除所有容器（包括运行中的容器） docker rm -f `docker ps -a -q`
 我们可以将docker容器粗暴的比拟为一个虚拟机，在创建docker容器的时候可以指定每个docker
 容器所占用的物理内存和swap内存。
 
@@ -103,6 +105,99 @@ docker里面的服务是不能通过127.0.0.1或者localhost来访问宿主机�
 docker容器在启动时，加上  --network host 这个命令来设置让docker容器和宿主机保持在同一网段，这样docker容器就可以使用localhost和127.0.0.1来访问宿主机了
 Docker容器运行的时候有 host 、 bridge 、 none 三种网络可供配置。
 默认是 bridge ，即桥接网络，以桥接模式连接到宿主机； host 是宿主网络，即与宿主机共用网络； none 则表示无网络，容器将无法联网。
+windows下安装docker,需要安装一个额外的东西，百度一下windows下安装docker
+安装好之后在开始-所有程序里面有一个Docker文件夹，里面会有一个Docker QuckStart Terminal，使用这个我们就可以执行linux命令了，并且这里面可以运行docker的命令
+
+docker私服
+	注册或登录阿里云在产品与服务里面找到容器镜像服务并进入，然后添加命名空间，之后添加镜像仓库，
+	值得注意的是，这里的一个镜像仓库实际上就是一个镜像，例如我们新建一个eureka镜像，选择好命名空间和地域，填写好仓库名称 eureka 
+	仓库类型选择私有、摘要随便填写然后点击下一步，在接下来的页面中勾选代码变更自动构建镜像、代码源处选择本地仓库，这时镜像仓库就创建好了
+	创建好镜像仓库后，返回到仓库列表页面，选中eureka那一条右边的操作列中的管理可以看到登录阿里云的命令
+	这时，我们回到自己的编写代码的机器，需要做如下才做来将本地的项目构建成镜像并推到阿里云镜像仓库
+	- B 在项目根目录下执行mvn clean package -U 重新构建jar包，-U是强制更新
+	- A 在eureka项目中创建Dockerfile文件（注意这个文件不需要后缀名）,文件内容如下
+	  FROM  hub.c.163.com/library/java:8-alpine 因为eureka是一个Java服务，所以肯定需要java的运行环境，这一句话的意思就是这个容器是以java为基础的
+												那么这个地址去哪里找呢，国内都推荐去网易云的镜像仓库去拿，
+												具体操作是进入网易云-产品-镜像仓库-镜像中心-搜索java-选中library/java并点击-选择版本标签-选择一个合适的版本
+												然后复制右上角的 hub.c.163.com/library/java:latest 这一段内容并将lastest改成自己的java版本，比如我们选择的是8-alpine
+	  ADD target/*.jar app.jar  意思就是把eureka项目中target目录下的jar包添加到镜像中
+	  EXPOSE 8761 设置镜像端口
+	  ENTRYPOINT ["java", "-jar", "app.jar"] 让镜像执行java -jar 命令运行eureka服务
+	- C 假设编写代码的机器已经安装的docker ,那么在docker里面执行以下命令登录阿里云的镜像仓库
+	  docker login --username=大叔在路上1988 registry.cn-shenzhen.aliyuncs.com
+	  这个命令的后半段就是在阿里云仓库-管理里面的内容了
+	- D 使用以下命令构建镜像 docker build -t registry.cn-shenzhen.aliyuncs.com/springcloud-namespace/eureka .
+	  registry.cn-shenzhen.aliyuncs.com/springcloud-namespace/eureka这一段内容复制的是阿里云仓库-管理里面的docker push命令后面的那一段内容
+	- C 使用以下命令将镜像推送到镜像仓库 docker push registry.cn-shenzhen.aliyuncs.com/springcloud-namespace/eureka
+  	通过以上步骤，已经把本地的项目构建成镜像并推送到阿里云镜像仓库了，接下来就是在rancher中拉取镜像构建服务
+	编写build.sh脚本文件用于构建镜像并推送到私服，build.sh脚本的内容如下
+	#!/usr/bin/env/ bash
+	mvn clean package -Dmaven.test.skip=true -U
+	docker build -t registry.cn-shenzhen.aliyuncs.com/springcloud-namespace/config .
+	docker login --username=大叔在路上1988 registry.cn-shenzhen.aliyuncs.com
+	docker push registry.cn-shenzhen.aliyuncs.com/springcloud-namespace/config
+	注意，在windows下执行build.sh这个shell脚本，需要使用Docker QuickStart Terminal这个客户端里面执行bash build.sh，执行完之后如果有问题，控制台会输出问题的信息
+	解决好问题之后再次执行bash build.sh这个命令重新推送，成功之后控制台最后一行会显示这个镜像在私服上的版本
+	遗留问题：shell脚本编程
+	
+	
+rancher
+	- 准备工作，首先需要知道rancher1.6的api：进入到rancher的网关 http://www.rancher.com拉到最底部找到Docs-Rancher 1.6 Docs
+	  另外Rancher需要两台不同的服务器，一台Rancher Server 一台Rancher Agent，我们可以使用VMWare来安装两个虚拟机并在虚拟机里面安装好docker
+	- rancher server 环境安装
+	  进入到api后点击Quick Start Guide 找到 START RANCHER SERVER 就可以看到如下命令:sudo docker run -d --restart=unless-stopped -p 8080:8080 rancher/server:stable
+	  在我们的虚拟机里面执行这个命令之前，我们先在虚拟机里面设置一下镜像加速器，如果不设置镜像加速器的话，拉取rancher镜像会非常非常慢，设置方法是：
+	  vim /etc/docker/daemon.json
+	  {
+		"registry-mirrors": ["https://fy707np5.mirror.aliyuncs.com"]
+	  }
+	  修改完文件后执行一下两条命令使得镜像加速器生效
+	  systemctl daemon-reload
+	  systemctl restart docker
+	  注意设置了镜像加速器之后，下一次再进入虚拟机要使用docker时，会报错，需要重新执行一下以上两条命令，这个镜像加速器应该是通用的
+	  弄好之后执行sudo docker run -d --restart=unless-stopped -p 8080:8080 rancher/server:stable命令来安装并运行rancher容器
+	  由于我们的虚拟机在安装时默认的防火墙是打开的，如果防火墙设置的是打开的话，记得要放开对应的8080端口
+	  运行好rancher容器之后，我们就可以在本地的浏览器里面输入 http://虚拟机ip:8080/ 来访问rancher server的主页了，进入之后
+	  在右下角设置成简体中文，第一次进入时，会在顶部出现一条提示信息让你添加一台安装了支持Docker版本的Linux主机，我们点击添加主机会出现当前站点的页面，就默认当前站点就好
+	  然后点击保存，这时候就需要去配置Rancher Agent主机了,在这个页面我们选择Custom，其实在这个页面我们就已经能看到对rancher agent的要求了
+	  构建好rancher agent 服务器之后，回到这个页面，在指定用于注册这台主机的公网IP一栏填写 rancher agent 服务器的ip地址，假设是192.168.134.130
+	  然后“将下列脚本拷贝到每一台主机上运行以注册 Rancher” 一栏的内容会变，拷贝这一栏的内容到rancher agent 服务器去执行
+	  执行完成之后去agent服务器查看运行的docker运行的容器，就会发现有一个agent容器。
+	  回到Rancher Server页面，点击关闭，关闭之后页面会自动定位到基础架构-主机页面，我们就能在里面找到我们的ServerAgent
+	- 菜单-Default-环境管理-所谓环境就是 开发-测试-生产 环境，rancher自身默认的环境编排工具是Cattle
+	- 菜单-应用- 应用就是我们自己创建的应用了
+	- 菜单-应用商店-就是rancher默认提供的一些现成的应用
+	- 菜单-基础架构-就是主机、容器，镜像库等，值得注意的是存储，docker容器的数据是在容器被关闭之后数据就会丢失，如果想保留docker容器的数据，就可以通过存储提供的功能来实现了
+	- 菜单-系统管理-就是用户和日志什么的
+	- 添加应用和服务
+	  - 镜像库 首先在基础机构-镜像库里面添加我们的阿里云私有镜像仓库，地址填写registry.cn-shenzhen.aliyuncs.com 然后是用户名密码
+	  - 应用 然后在应用-用户-添加用户
+	  - 服务 在对应的服务下面添加服务，输入服务名称镜像地址例如 registry.cn-shenzhen.aliyuncs.com/springcloud-namespace/config
+	         然后端口映射是8080:8080 8080是在项目里面写的Dockerfile 那个EXPOSE 命令后面的端口号
+		     添加完服务后，等待服务启动完成，我们就可以通过在浏览器里面输入 http://ServerAgentHost:8080/来访问对应的服务了
+	  
+	- rancher agent
+	  安装另外一台虚拟机用于rancher agent ，这不需要做额外的设置，只需要保证与其他主机之间的UDP端口 500和4500端口是放开的即可，并且安装了docker
+	  如果我们是使用的VMWare，那么就不用去管端口的事情了，因为VMWare虚拟机在创建时默认是将防火墙设置成关闭状态的
+	
+	-配置eureka高可用,首先修改好eureka项目,需要application.yml、application-eureka1.yml、application-eureka2.yml 三个配置文件
+	 然后使用bash build.sh重新将镜像推送到阿里云私有镜像仓库
+	 然后去rancher的服务里面将原有的eureka服务删除,
+	 然后重新添加eureka服务eureka1，端口映射8761:8761 环境变量 spring.profiles.active eureka1
+	 然后重新添加eureka服务eureka2，端口映射8762:8762 环境变量 spring.profiles.active eureka2
+	 然后修改config服务的配置，将eureka的defaultZone改成http://eureka1:8761/eureka1/,http://eureka2:8762/eureka/，重新推送config镜像到阿里云私有镜像库
+	 然后在rancher的config服务后面点击升级即可，升级完成之后在服务列表页面点击config服务后面的升级完成
+	 
+	-配置product高可用
+	 首先需要修改配置文件，将application.yml配置文件里面的server.port配置给干掉
+	 然后将Dockerfile文件里面的EXPOSE 9002 这一行干掉
+	 然后构建镜像到阿里云私有镜像仓库并在rancher中建立服务，建立服务时不指定端口，
+	 当服务运行起来后，在应用列表中点击product服务进入到product服务的详情页，然后在数量那儿点击+，每点一次+就会多启动一个product的docker容器，
+	 从而实现动态扩容，负载均衡由eureka的ribbon负载均衡器来实现
+	 
+	
+	  
+	
 
   
 

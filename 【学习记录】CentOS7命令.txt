@@ -28,4 +28,4 @@ service mysql stop 停止MYSQL服务
 sysctl net.ipv4.ip_forward 查看是否开启外网访问
 使用 curl http://localhost:80/domain/getDomain 可以调用本地服务的接口
 VIM编辑器中在命令行模式下可以使用%d 命令来清空文件内容。可以使用 shift + g 来到文件末尾
-
+使用命令 cat /etc/redhat-release 命令可以查看当前操作系统的版本

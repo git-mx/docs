@@ -219,7 +219,6 @@
 	- spanId 这是下一层的请求跟踪ID，一个traceId可以包含一个以上的spanId
 	- parentId 是上层请求的跟踪ID
 
-
 	
 	
 	
