@@ -218,7 +218,14 @@
 	- traceId 全局的跟踪ID它是跟踪的入口点，根据需求来决定在哪生成traceId，一般的http请求就是请求开始的地方生成traceId，
 	- spanId 这是下一层的请求跟踪ID，一个traceId可以包含一个以上的spanId
 	- parentId 是上层请求的跟踪ID
-
+046 spring-cloud-stream 它其实就是对rabbitMQ的JAVA封装
+047 SpringCloud消息相关
+    - 消息代理（MessageBroker）是指具体的消息中间件产品，例如RabbitMQ、RocketMQ等；
+	- amqp 它是一组针对消息中间件产品的规范，它定义了消息中间件产品应该遵守什么样的规范，RabbitMQ等都是以amqp规范来实现的
+	- spring-cloud-stream 它是对rabbitMQ的JAVA封装
+	- spring-cloud-bus 它是SpringCloud微服务框架中的消息总线，它是以spring-cloud-stream和java事件作为基础的。服务之间通过spring-cloud-stream来通信的，服务接收端在收到MQ消息之后，将收到的消息转换成JAVA
+	                   事件去实现对应的业务逻辑，服务发送端也是将JAVA事件转化成MQ消息发布出去
+     
 	
 	
 	
