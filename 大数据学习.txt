@@ -1,1 +1,45 @@
-https://blog.csdn.net/sinat_33518009/article/details/79434177
+在CentOS7中让elasticsearch以服务的方式启动，
+1在/etc/init.d中新建elasticsearch文件，内容如下
+2执行chmod 777 elasticsearch
+3执行命令chkconfig --add elasticsearch
+4执行命令chkconfig --del elasticsearch
+
+#!/bin/bash
+#chkconfig: 345 63 37
+#description: elasticsearch
+#processname: elasticsearch-6.5.0
+export ES_HOME=/usr/local/elasticsearch-6.5.0
+
+case $1 in
+        start)
+                export JAVA_HOME=/usr/local/java/jdk1.8.0_192
+                su esuser<<!
+                cd $ES_HOME
+                ./bin/elasticsearch -d -p pid
+                exit
+!
+                echo "elasticsearch is started"
+                ;;
+        stop)
+                pid=`cat $ES_HOME/pid`
+                kill -9 $pid
+                echo "elasticsearch is stopped"
+                ;;
+        restart)
+                pid=`cat $ES_HOME/pid`
+                kill -9 $pid
+                echo "elasticsearch is stopped"
+                sleep 1
+                export JAVA_HOME=/usr/local/java/jdk1.8.0_192
+                su esuser<<!
+                cd $ES_HOME
+                ./bin/elasticsearch -d -p pid
+                exit
+!
+                echo "elasticsearch is started"
+                ;;
+        *)
+        echo "start|stop|restart"
+        ;;
+esac
+exit 0
