@@ -31,3 +31,4 @@ VIM编辑器中在命令行模式下可以使用%d 命令来清空文件内容�
 使用命令 cat /etc/redhat-release 命令可以查看当前操作系统的版本
 添加用户的命令 adduser esuser
 切换用户 su username
+cat log.txt | grep 'ERROR' -C 5 在日志文件当中搜索指定内容 -C是显示上下5行
